@@ -6,7 +6,7 @@ Framer.js layer displaying camera image.
 Usage for Framer Studio
 -----
 
-1. **Download [CameraLayer.coffee](https://raw.githubusercontent.com/ktcy/CameraLayer/master/CameraLayer.framer/modules/CameraLayer.coffee)**
+1. **Download [CameraLayer.coffee](https://raw.githubusercontent.com/ktcy/CameraLayer/video-layer/CameraLayer.framer/modules/CameraLayer.coffee)**
 
   Place it into `modules` folder under your Framer Studio project. ([details](http://framerjs.com/docs/#modules.modules))
 
