@@ -5,8 +5,9 @@ Screen.backgroundColor = 'black'
 camera = new CameraLayer
 	size: Screen.size
 	facing: 'front'
-	autoflip: true
-
-camera.onClick -> camera.toggleFacing()
+	flipped: false
+	autoFlip: true
+	resolution: 720
+	fit: 'cover'
 
 camera.start()
