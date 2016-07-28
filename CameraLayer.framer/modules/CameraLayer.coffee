@@ -1,24 +1,29 @@
 module.exports = class CameraLayer extends VideoLayer
   constructor: (options = {}) ->
-    options = do (clone = {}) ->
-      clone[key] = value for key, value of options
-      clone
+    customProps =
+      facing: true
+      flipped: true
+      autoFlip: true
+      resolution: true
+      fit: true
 
-    {facing, flipped, autoFlip, resolution, fit} = options
-    delete options.facing
-    delete options.flipped
-    delete options.autoFlip
-    delete options.resolution
-    delete options.fit
-    super(options)
+    baseOptions = Object.keys(options)
+      .filter (key) -> !customProps[key]
+      .reduce (clone, key) ->
+        clone[key] = options[key]
+        clone
+      , {}
 
-    @_facing = facing ? 'back'
-    @_flipped = flipped ? false
-    @_autoFlip = autoFlip ? true
-    @_resolution = resolution ? 480
+    super(baseOptions)
+
+    @_facing = options.facing ? 'back'
+    @_flipped = options.flipped ? false
+    @_autoFlip = options.autoFlip ? true
+    @_resolution = options.resolution ? 480
 
     @_started = false
     @_device = null
+    @_matchedFacing = 'unknown'
     @_stream = null
     @_scheduledRestart = null
 
@@ -27,7 +32,7 @@ module.exports = class CameraLayer extends VideoLayer
     @player.src = ''
     @player.autoplay = true
     @player.muted = true
-    @player.style.objectFit = fit ? 'cover'
+    @player.style.objectFit = options.fit ? 'cover'
 
   @define 'facing',
     get: -> @_facing
@@ -71,9 +76,13 @@ module.exports = class CameraLayer extends VideoLayer
       devices = devices.filter (device) -> device.kind == 'videoinput'
       return if devices.length == 0
 
-      facing = "facing #{@_facing}"
-      devices.reduce (current, next) ->
-        if next.label.indexOf(facing) != -1 then next else current
+      for device in devices
+        if device.label.indexOf(@_facing) != -1
+          @_matchedFacing = @_facing
+          return device
+
+      @_matchedFacing = 'unknown'
+      devices[0]
 
     .then (device) =>
       return if !device || device.deviceId == @_device?.deviceId
@@ -119,7 +128,7 @@ module.exports = class CameraLayer extends VideoLayer
       @start()
 
   _flip: ->
-    @_flipped = @_facing == 'front' if @_autoFlip
+    @_flipped = @_matchedFacing == 'front' if @_autoFlip
     x = if @_flipped then -1 else 1
     @player.style.webkitTransform = "scale(#{x}, 1)"
 
